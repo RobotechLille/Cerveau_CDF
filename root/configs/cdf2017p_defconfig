@@ -62,3 +62,9 @@ BR2_ROOTFS_OVERLAY="${BR2_EXTERNAL_CDF_PATH}/board/robotech/cdf2017p/rootfs_over
 # board/raspberrypi/post-build.sh s'occupe déjà de ça
 BR2_TARGET_GENERIC_GETTY=n
 
+# Pour le Wi-Fi
+BR2_PACKAGE_LINUX_FIRMWARE=y
+BR2_PACKAGE_LINUX_FIRMWARE_BRCM_BCM43XXX=y
+BR2_PACKAGE_WPA_SUPPLICANT=y
+BR2_PACKAGE_RSYNC=y
+
