@@ -1,0 +1,5 @@
+config BR2_PACKAGE_CDF2017P
+    bool "cdf"
+    help
+        Cerveau du robot principal pour la Coupe de France
+        de Robotique 2017, équipe Robotech (Polytech Lille).
