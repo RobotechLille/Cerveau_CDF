@@ -1,6 +1,10 @@
 
-compile:
+reconfigure: buildroot/.config
+
+buildroot/.config:
 	make -C buildroot BR2_EXTERNAL=.. cdf2017p_defconfig
+
+compile: buildroot/.config
 	make -C buildroot
 
 .principal-ip:
@@ -15,6 +19,6 @@ reboot: .principal-ip
 
 upgrade: compile .principal-ip
 	# TODO C'est horriiiiiiible de faire ça comme ça ^^
-	rsync rsync -e 'ssh -l root -i id_rsa' -a --chown root:root buildroot/output/target/ $$(cat .principal-ip):/
+	rsync -e 'ssh -l root -i id_rsa' -a --chown root:root buildroot/output/target/ $$(cat .principal-ip):/
 
 .PHONY: compile upload reboot
