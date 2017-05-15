@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-cd buildroot
-
-make BR2_EXTERNAL=.. cdf2017p_defconfig
-make
