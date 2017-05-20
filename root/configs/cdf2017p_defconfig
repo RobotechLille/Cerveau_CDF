@@ -59,6 +59,9 @@ BR2_PACKAGE_DROPBEAR=y
 # Fichiers supplémentaires
 BR2_ROOTFS_OVERLAY="${BR2_EXTERNAL_CDF_PATH}/board/robotech/cdf2017p/rootfs_overlay/"
 
+# On s'en fiche du bluetooth non ?
+BR2_ROOTFS_POST_SCRIPT_ARGS=""
+
 # board/raspberrypi/post-build.sh s'occupe déjà de ça
 BR2_TARGET_GENERIC_GETTY=n
 
@@ -72,4 +75,10 @@ BR2_PACKAGE_RSYNC=y
 
 # Pour faire plaisir à Geoffrey
 BR2_PACKAGE_HTOP=y
+
+# Pour uploader sur les Arduinos
+BR2_TOOLCHAIN_BUILDROOT_WCHAR=y
+BR2_SHARED_LIBS=y
+BR2_PACKAGE_UCLIBC=y
+BR2_PACKAGE_AVRDUDE=y
 
