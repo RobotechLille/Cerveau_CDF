@@ -1,7 +1,12 @@
 default: compile
 
+# CONSTANTES
+
 # Périphérique bloc à utiliser pour flasher
 SDCARD=/dev/mmcblk0
+
+# Liste des programmes Arduinos
+ARDUNIOS=ardPince
 
 # SYSTÈME D'EXPLOITATION
 
@@ -32,6 +37,10 @@ flash: compile $(SDCARD)
 	resize2fs $(SDCARD)*2
 	sync
 
+# Graphiques (parce que c'est rigolo)
+graphs:
+	make -C buildroot graph-{size,build,depends{,-requirements}}
+
 # CONNEXION AU ROBOT
 
 # Il vous faudra pour ces actions le fichier principalconf.sh
@@ -61,4 +70,8 @@ upgrade: sshconf configure
 	make -C buildroot target-finalize
 	@# TODO C'est horriiiiiiible de faire ça comme ça ^^
 	rsync -e 'ssh -F sshconf' -a --chown root:root buildroot/output/target/ principal:/
+
+# ARDUINOS
+
+
 

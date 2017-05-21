@@ -41,7 +41,8 @@ BR2_ROOTFS_POST_SCRIPT_ARGS="--add-pi3-miniuart-bt-overlay"
 
 # Custom
 
-# Utilisation du cache pour accélerer la compilation
+# Pour accélerer la compilation
+BR2_TOOLCHAIN_EXTERNAL=y
 BR2_CCACHE=y
 
 # Pour faire joli
