@@ -15,6 +15,8 @@ start() {
 stop() {
 	printf "Stopping Wi-Fi connection: "
 	killall -q wpa_supplicant
+    ip link set wlan0 down
+    rmmod brcmfmac
 	echo "OK"
 }
 

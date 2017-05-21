@@ -1,27 +1,77 @@
+default: compile
 
-reconfigure: buildroot/.config
+# CONSTANTES
 
-buildroot/.config:
+# Périphérique bloc à utiliser pour flasher
+SDCARD=/dev/mmcblk0
+
+# Liste des programmes Arduinos
+ARDUNIOS=ardPince
+
+# SYSTÈME D'EXPLOITATION
+
+# Configuration
+buildroot/.config: configs/cdf2017p_defconfig
 	make -C buildroot BR2_EXTERNAL=.. cdf2017p_defconfig
 
-compile: buildroot/.config
-	make -C buildroot
+configure: buildroot/.config
 
-.principal-ip:
-	@echo "Quelle est l'IP du Robot principal ?"
-	@read ip; echo $$ip > $@
+# Compile l'OS (ça prend quelques heures)
+compile: configure
+	make -C buildroot target-finalize
 
-ssh: .principal-ip
-	ssh -l root -i id_rsa $$(cat .principal-ip)
+# Supprime tous les fichiers de l'OS
+clean:
+	make -C buildroot clean
 
-reboot: .principal-ip
-	ssh -l root -i id_rsa $$(cat .principal-ip) /sbin/reboot
+# Dernier recours en cas de compilation d'OS foireuse
+# (faut être patient)
+recompile: clean compile
 
-upgrade: compile .principal-ip
+# Flashe l'image sur la carte SD
+flash: compile $(SDCARD)
+	dd if=buildroot/output/images/sdcard.img of=$(SDCARD) bs=4M
+	sync
+	echo -e "resizepart 2\n100%\nquit" | parted $(SDCARD)
+	sync
+	resize2fs $(SDCARD)*2
+	sync
+
+# Graphiques (parce que c'est rigolo)
+graphs:
+	make -C buildroot graph-{size,build,depends{,-requirements}}
+
+# CONNEXION AU ROBOT
+
+# Il vous faudra pour ces actions le fichier principalconf.sh
+
+# Crée un fichier de conf utilisable pour s'y connecter
+sshconf: principalconf.sh
+	source $$PWD/$<; echo -e "Host principal p\n    User root\n    Hostname $$IP\n    PreferredAuthentications publickey\n    PubkeyAuthentication yes\n    IdentityFile \"$$PWD/sshkey\"" > "$@"
+	source $$PWD/$<; echo -e "$$SSHCPRV" > sshkey
+	chmod 600 sshkey
+
+# Lance une connexion SSH, tout bêtement
+ssh: sshconf
+	ssh -F sshconf principal
+
+# Redémarre le robot
+reboot: sshconf
+	ssh -F sshconf principal /sbin/reboot
+
+# Met le robot à l'heure (jusqu'au prochain redémarrage)
+# (ce qui est une mauvaise idée parce que du coup rsync
+# n'écrase pas les fichiers modifiés directement sur le Pi)
+#date: sshconf
+#	ssh -F sshconf principal "date -s $(date +%Y%m%d%H%M.%S)"
+
+# Met à jour le Raspberry Pi (par rapport à ce dépôt)
+upgrade: sshconf configure
+	make -C buildroot target-finalize
 	@# TODO C'est horriiiiiiible de faire ça comme ça ^^
-	rsync -e 'ssh -l root -i id_rsa' -a --chown root:root buildroot/output/target/ $$(cat .principal-ip):/
+	rsync -e 'ssh -F sshconf' -a --chown root:root buildroot/output/target/ principal:/
 
-flash: compile
-	dd if=buildroot/output/images/sdcard.img of=/dev/mmcblk0 bs=4M
+# ARDUINOS
 
-.PHONY: compile upload reboot
+
+

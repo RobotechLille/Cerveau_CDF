@@ -1,3 +1,6 @@
 [submodule "root/buildroot"]
         path = root/buildroot
         url = git://git.buildroot.net/buildroot
+[submodule "ardPince/Arduino-Makefile"]
+	path = ardPince/Arduino-Makefile
+	url = https://github.com/sudar/Arduino-Makefile
