@@ -4,6 +4,10 @@ if file ${BR2_EXTERNAL_CDF_PATH}/principalconf.sh &> /dev/null
 then
     source ${BR2_EXTERNAL_CDF_PATH}/principalconf.sh
 
+    # Wi-Fi configuration
+    mkdir -p ${TARGET_DIR}/etc/wpa_supplicant/
+    wpa_passphrase "$WIFISSID" "$WIFIPSWD" > ${TARGET_DIR}/etc/wpa_supplicant/wpa_supplicant.conf
+
     # SSH configuration
     rm ${TARGET_DIR}/etc/dropbear &> /dev/null
     mkdir -p ${TARGET_DIR}/etc/dropbear/
