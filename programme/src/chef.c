@@ -17,8 +17,8 @@
 
 //Variables Globales
 
-coor PositionR;
-
+coor PositionR,PositionA;
+int orientationRobot;
 int* terrain[2];
 int Equipe;
 int phase;
@@ -49,8 +49,31 @@ void free_Terrain()
 }
 
 
-//// pathfinding fonctions
+//// direction fonctions
 
+int envoi_donnée_moteur(); //TODO 2octets un pour le type de mouvement un pour la distance ou l'angle a faire
+int tourner(int angle)
+{
+    //TODO envoyer les donner de virage au moteur
+    orientationRobot+= angle;
+
+    coor PositionR = getIMUdata();
+}
+int deplacer(float x, float y)
+{
+    coor pos_actuel = PositionA;
+    coor refIMU = getIMUdata() //TODO fonction de recuperation des données IMU donc de la Position
+    // x = distanceparcourue*cos(orientationR)
+    // y = distanceparcourue*sin(orientationRobot)
+    //transformation du déplacement imu en déplacement sur le repere général.
+    // sinon on peut envoyer directement la distance a parcourir
+    //faire la différence pour obtenir le déplacement en centimetre effecctué dans l'orientation
+
+}
+
+int recupererObjet();
+int lacherObjet();
+int choisirCouleur();
 
 int main() {
 
