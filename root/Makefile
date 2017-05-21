@@ -1,6 +1,6 @@
 default: compile
 
-upgrade-all: upgrade-arduinos upgrade-filesystem
+upgrade-all: upgrade-arduinos upgrade-programme upgrade-filesystem
 
 # CONSTANTES
 
@@ -22,6 +22,10 @@ configure: buildroot/.config
 compile: configure
 	make -C buildroot target-finalize
 
+# Crée l'image à flasher
+image:
+	make -C buildroot
+
 # Supprime tous les fichiers de l'OS
 clean:
 	make -C buildroot clean
@@ -31,8 +35,8 @@ clean:
 recompile: clean compile
 
 # Flashe l'image sur la carte SD
-flash: compile $(SDCARD)
-	dd if=buildroot/output/images/sdcard.img of=$(SDCARD) bs=4M
+flash: image $(SDCARD)
+	dd if=buildroot/output/images/sdcard.img of=$(SDCARD) bs=10M
 	sync
 	echo -e "resizepart 2\n100%\nquit" | parted $(SDCARD)
 	sync
@@ -83,4 +87,10 @@ ard%.up: ../ard%/build/main.hex
 	ssh -F sshconf principal "avrdude $(shell make --quiet -C ../$(basename $@) ARDUINO_QUIET=true FORCE_MONITOR_PORT=y TARGET_HEX=/tmp/$(basename $@).hex MONITOR_PORT=/opt/cdf/com/$(basename $@) exportOpts) "
 
 upgrade-arduinos: $(addsuffix .up,$(PROGS_ARDUINO))
+
+# PROGRAMME
+
+prog: programme
+programme:
+	make -C buildroot cdf2017p-rebuild
 

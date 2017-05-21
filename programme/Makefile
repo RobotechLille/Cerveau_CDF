@@ -1,5 +1,6 @@
 # Règle par défaut
-all: bin/chef
+#all: bin/chef
+all: bin/pince
 
 # Constantes
 CC=clang
@@ -9,6 +10,9 @@ CFLAGS=-g -Wall -Wextra -pedantic
 
 # Binaires
 bin/chef: obj/chef.o
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+bin/pince: obj/pince.o obj/serial.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 # Objets
