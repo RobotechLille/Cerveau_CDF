@@ -77,6 +77,10 @@ upgrade-filesystem: sshconf configure
 	@# TODO C'est horriiiiiiible de faire ça comme ça ^^
 	rsync -e 'ssh -F sshconf' -a --chown root:root buildroot/output/target/ principal:/
 
+# Met jour les overlays (une partie des fichiers)
+upgrade-overlays: sshconf
+	rsync -e 'ssh -F sshconf' -a --chown root:root board/robotech/cdf2017p/rootfs_overlay/ principal:/
+
 # ARDUINOS
 
 ../ard%/build/main.hex: ../ard%

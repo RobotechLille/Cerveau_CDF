@@ -18,5 +18,15 @@ else
     echo "Récupérez le fichier principalconf.sh pour pouvoir vous connecter au vrai robot !"
 fi
 
+# Demote some services
+for service in S20urandom S40network S50dropbear
+do
+    if [ -f ${TARGET_DIR}/etc/init.d/${service} ]
+    then
+        mv ${TARGET_DIR}/etc/init.d/${service} ${TARGET_DIR}/etc/extra.d/${service}
+    fi
+
+done
+
 dd if=/dev/urandom of=${TARGET_DIR}/etc/random-seed bs=512 count=1
 
