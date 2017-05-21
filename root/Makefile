@@ -1,4 +1,6 @@
 
+
+
 configure: buildroot/.config
 
 clean:
@@ -32,8 +34,15 @@ upgrade: sshconf
 	@# TODO C'est horriiiiiiible de faire ça comme ça ^^
 	rsync -e 'ssh -F sshconf' -a --chown root:root buildroot/output/target/ principal:/
 
-flash: compile
-	dd if=buildroot/output/images/sdcard.img of=/dev/mmcblk0 bs=4M
+SDCARD=/dev/mmcblk0
+
+flash: compile $(SDCARD)
+	dd if=buildroot/output/images/sdcard.img of=$(SDCARD) bs=4M
+	sync
+	echo -e "resizepart 2\n100%\nquit" | parted $(SDCARD)
+	sync
+	resize2fs $(SDCARD)*2
+	sync
 
 .PHONY: compile upload reboot
 
