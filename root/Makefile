@@ -1,12 +1,14 @@
 default: compile
 
+upgrade-all: upgrade-arduinos upgrade-filesystem
+
 # CONSTANTES
 
 # Périphérique bloc à utiliser pour flasher
 SDCARD=/dev/mmcblk0
 
 # Liste des programmes Arduinos
-ARDUNIOS=ardPince
+PROGS_ARDUINO=ardPince
 
 # SYSTÈME D'EXPLOITATION
 
@@ -66,12 +68,19 @@ reboot: sshconf
 #	ssh -F sshconf principal "date -s $(date +%Y%m%d%H%M.%S)"
 
 # Met à jour le Raspberry Pi (par rapport à ce dépôt)
-upgrade: sshconf configure
+upgrade-filesystem: sshconf configure
 	make -C buildroot target-finalize
 	@# TODO C'est horriiiiiiible de faire ça comme ça ^^
 	rsync -e 'ssh -F sshconf' -a --chown root:root buildroot/output/target/ principal:/
 
 # ARDUINOS
 
+../ard%/build/main.hex: ../ard%
+	make -C $<
 
+ard%.up: ../ard%/build/main.hex
+	scp -F sshconf -q "$<" principal:/tmp/$(basename $@).hex
+	ssh -F sshconf principal "avrdude $(shell make --quiet -C ../$(basename $@) ARDUINO_QUIET=true FORCE_MONITOR_PORT=y TARGET_HEX=/tmp/$(basename $@).hex MONITOR_PORT=/opt/cdf/com/$(basename $@) exportOpts) "
+
+upgrade-arduinos: $(addsuffix .up,$(PROGS_ARDUINO))
 
