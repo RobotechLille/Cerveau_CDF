@@ -6,7 +6,10 @@
 start() {
 	printf "Starting extra services: "
 	# TODO Charger uniquement si le jumper de DEBUG est là
-	/etc/extra.d/rcS
+    if ! /opt/cdf/bin/testpin 0 1
+    then
+        /etc/extra.d/rcS
+    fi
 	echo "OK"
 }
 

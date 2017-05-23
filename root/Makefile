@@ -98,3 +98,8 @@ prog: programme
 programme:
 	make -C buildroot cdf2017p-rebuild
 
+upgrade-programme: programme
+	make -C buildroot cdf2017p-reinstall
+	rsync -e 'ssh -F sshconf' -a --chown root:root buildroot/output/target/opt/cdf principal:/opt/
+
+
