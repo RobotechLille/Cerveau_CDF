@@ -4,38 +4,6 @@
 #include <stdbool.h>
 #include <signal.h>
 
-// PINCE
-
-void take()
-{
-
-}
-
-void drop()
-{
-
-}
-
-// FUNNY ACTION
-
-void funnyAction()
-{
-
-}
-
-// TIRETTE
-void tirette() {
-    // TODO Attend que la tirette soit enlevée
-}
-
-// OBSTACLE
-
-bool obstacleDevant()
-{
-    // TODO
-    return false;
-}
-
 // MOTEUR
 
 int ardMoteur;
@@ -56,6 +24,51 @@ void pivoter(float dist)
 void stop()
 {
     sendChar(ardMoteur, 2);
+}
+
+// PINCE
+
+void take()
+{
+
+}
+
+void drop()
+{
+
+}
+
+// FUNNY ACTION
+
+void funnyAction()
+{
+    char signal = 5;
+    write(ardMoteur, &signal, sizeof(signal));
+    signal = readChar(ardMoteur);
+    if (signal != 5) {
+        perror("Moteur attendait signal 5\n");
+        exit(1);
+    }
+}
+
+// TIRETTE
+
+void tirette() {
+    char signal = 6;
+    write(ardMoteur, &signal, sizeof(signal));
+    signal = readChar(ardMoteur);
+    if (signal != 6) {
+        perror("Moteur attendait signal 6\n");
+        exit(1);
+    }
+}
+
+// OBSTACLE
+
+bool obstacleDevant()
+{
+    // TODO
+    return false;
 }
 
 // COORDONNES

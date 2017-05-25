@@ -1,4 +1,3 @@
-
 #include <TimedPID.h>
 #include <SimpleTimer.h>
 #include <math.h>
@@ -68,55 +67,7 @@ int trig = 53;
 int echo = 52;
 long lecture_echo;
 long cm;
-void setup() {
-    myservo.attach(9);
-    myservo.write(25);
-    delay(15);
 
-    //set sensor
-    pinMode(trig, OUTPUT);
-    digitalWrite(trig, LOW);
-    pinMode(echo, INPUT);
-
-    //Set PWM frequency to 31kHz for D11 & D12 !!!FOR Arduino Mega only
-    TCCR1B = TCCR1B & B11111000 | B00000001;
-    // Open Serial communication and wait for monitor to be opened
-    Serial.begin(9600);
-    while(!Serial);
-
-    // Set the PID controller command range
-    pid_G.setCmdRange(-fMax, fMax);
-
-    // Définition des pins et des routines d'interruption
-    attachInterrupt(0, compteur_gauche, RISING);    // Appel de compteur_gauche sur front montant valeur signal A de la codeuse gauche (interruption 0 = pin2 arduino mega)
-    // attachInterrupt(1, compteur_droit, RISING);     // Appel de compteur_droit sur front montant valeur signal A de la codeuse droite (interruption 1 = pin3 arduino mega)
-    pinMode(pinB_G, INPUT);   // Pin de signal B du la codeuse gauche
-    pinMode(pinB_D, INPUT);   // Pin de signal B de la codeuse droite
-
-    // Liaison avec les résistances de Pull-up pour les interuptions
-    digitalWrite(pinA_G,HIGH);
-    digitalWrite(pinA_D,HIGH);
-    digitalWrite(pinB_G,HIGH);
-    digitalWrite(pinB_D,HIGH);
-
-    pinMode(pin_cmd_G,OUTPUT);
-    pinMode(pin_rot_G,OUTPUT);
-    pinMode(pin_cmd_D,OUTPUT);
-    pinMode(pin_rot_D,OUTPUT);
-
-    //tirette
-    pinMode(pinTirette, OUTPUT);
-    digitalWrite(pinTirette,HIGH) ;
-    // Initialisation du timer qui lance le calcul PID (fonction asservissement) à la fréquence d'échantillonage
-    timer_T = timer.setInterval(1000/frequence_echantillonnage,asservissement);
-    delay(1);
-    timer.enable(timer_T);
-    delay(1);
-}
-
-void loop() {
-    timer.run();
-}
 
 // Vérifie le capteur devant
 void verifierCapDev() {
@@ -134,7 +85,7 @@ void verifierCapDev() {
 /* Fonctions pour la communication série */
 void floatToStr(float f, char r[8]) {
     char s[255];
-    sprintf(s, "%8f", f);
+    sprintf(s, "%8f", (double) f);
     int i;
     for (i = 0; i < 8; i++) {
         r[i] = s[i];
@@ -155,9 +106,8 @@ float Serialreadfloat()
 
 void Serialsendfloat(float a)
 {
-    // char retour[8];
-    // floatToStr(a, retour);
-    char retour[8] = "123.4567";
+    char retour[9] = "123.4567";
+    floatToStr(a, retour);
     int i;
     for (i = 0; i < 8; i++) {
         Serial.write(retour[i]);
@@ -183,8 +133,10 @@ void retourConsigne()
     {
         return;
     }
-    etat_PID = STOP;
-
+    Serial.write(etat_pid);
+    etat_pid = STOP;
+    delay(5);
+    Serialsendfloat(retour);
 }
 
 
@@ -284,8 +236,6 @@ void serialEvent() {
     {
         int cmd = Serial.read();
         delay(1);
-        inFloat = Serialreadfloat();
-
         switch (cmd) {
             case AVANCER_RECULER :
                 etat_pid = AVANCER_RECULER;
@@ -312,6 +262,7 @@ void serialEvent() {
                 etat_pid = STOP; // On est censé recevoir un STOP avant mais sais-t-on jamais
                 myservo.write(250);
                 delay(15);
+                Serial.write(FUNNY_ACT);
                 break;
 
             // Attend jusqu'à la tirette
@@ -324,3 +275,54 @@ void serialEvent() {
         }
     }
 }
+
+void setup() {
+    myservo.attach(9);
+    myservo.write(25);
+    delay(15);
+
+    //set sensor
+    pinMode(trig, OUTPUT);
+    digitalWrite(trig, LOW);
+    pinMode(echo, INPUT);
+
+    //Set PWM frequency to 31kHz for D11 & D12 !!!FOR Arduino Mega only
+    TCCR1B = TCCR1B & B11111000 | B00000001;
+    // Open Serial communication and wait for monitor to be opened
+    Serial.begin(9600);
+    while(!Serial);
+
+    // Set the PID controller command range
+    pid_G.setCmdRange(-fMax, fMax);
+
+    // Définition des pins et des routines d'interruption
+    attachInterrupt(0, compteur_gauche, RISING);    // Appel de compteur_gauche sur front montant valeur signal A de la codeuse gauche (interruption 0 = pin2 arduino mega)
+    // attachInterrupt(1, compteur_droit, RISING);     // Appel de compteur_droit sur front montant valeur signal A de la codeuse droite (interruption 1 = pin3 arduino mega)
+    pinMode(pinB_G, INPUT);   // Pin de signal B du la codeuse gauche
+    pinMode(pinB_D, INPUT);   // Pin de signal B de la codeuse droite
+
+    // Liaison avec les résistances de Pull-up pour les interuptions
+    digitalWrite(pinA_G,HIGH);
+    digitalWrite(pinA_D,HIGH);
+    digitalWrite(pinB_G,HIGH);
+    digitalWrite(pinB_D,HIGH);
+
+    pinMode(pin_cmd_G,OUTPUT);
+    pinMode(pin_rot_G,OUTPUT);
+    pinMode(pin_cmd_D,OUTPUT);
+    pinMode(pin_rot_D,OUTPUT);
+
+    //tirette
+    pinMode(pinTirette, OUTPUT);
+    digitalWrite(pinTirette,HIGH) ;
+    // Initialisation du timer qui lance le calcul PID (fonction asservissement) à la fréquence d'échantillonage
+    timer_T = timer.setInterval(1000/frequence_echantillonnage, asservissement);
+    delay(1);
+    timer.enable(timer_T);
+    delay(1);
+}
+
+void loop() {
+    timer.run();
+}
+
