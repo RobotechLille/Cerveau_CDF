@@ -38,6 +38,11 @@ void drop()
 
 }
 
+void push()
+{
+
+}
+
 // FUNNY ACTION
 
 void funnyAction()
@@ -61,14 +66,6 @@ void tirette() {
         perror("Moteur attendait signal 6\n");
         exit(1);
     }
-}
-
-// OBSTACLE
-
-bool obstacleDevant()
-{
-    // TODO
-    return false;
 }
 
 // COORDONNES
@@ -145,37 +142,13 @@ bool moveForward(float dist)
     printf("Avançons de %f cm\n", dist);
     char signal;
     avancer(dist);
-
-    // Boucle d'attente de signal
-    for (;;) {
-        // Si l'Arduino renvoie qu'il a terminé
-        if (read(ardMoteur, &signal, sizeof(signal)) > 0) {
-            if (signal != 0) {
-                perror("Moteur attendait signal 0\n");
-                exit(1);
-            }
-            updatePos(readFloat(ardMoteur));
-            printf("Destination atteinte.\n");
-            return true;
-
-            // Si il y a un obstacle devant
-        } else if (obstacleDevant()) {
-            stop();
-            printf("Stoppé pour obstacle");
-            signal = readChar(ardMoteur);
-            if (signal != 2) {
-                perror("Moteur attendait signal 2\n");
-                exit(1);
-            }
-            updatePos(readFloat(ardMoteur));
-            return false;
-
-            // Sinon on fout rien
-        } else {
-            sleep(0);
-            continue;
-        }
+    signal = readChar(ardMoteur);
+    if (signal != 0) {
+        perror("Moteur attendait signal 0\n");
+        exit(1);
     }
+    updatePos(readFloat(ardMoteur));
+    return true;
 }
 
 bool rotate(float angle)
@@ -208,6 +181,7 @@ void moveTo(float x, float y, bool avant)
         }
         break;
     }
+    printf("Destination atteinte.\n");
 }
 
 // PRINCIPAL

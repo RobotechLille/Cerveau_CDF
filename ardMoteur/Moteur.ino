@@ -11,8 +11,6 @@ Servo myservo;  // create servo object to control a servo
 #define AVANCER_RECULER 0
 #define TOURNER 1
 #define STOP 2
-#define OBST_DEV 3
-#define OBST_DER 4
 #define FUNNY_ACT 5
 #define TIRETTE 6
 
@@ -65,20 +63,27 @@ SimpleTimer timer;
 int timer_T;
 int trig = 53;
 int echo = 52;
+int trigAr = 53;
+int echoAr = 52;
 long lecture_echo;
 long cm;
 
 
-// Vérifie le capteur devant
-void verifierCapDev() {
-    digitalWrite(trig, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(trig, LOW);
-    lecture_echo = pulseIn(echo, HIGH);
-    cm = lecture_echo / 58;
-    if (cm < 12) {
-        Serial.write(OBST_DEV);
+// Vérifie le capteur
+bool obstacle() {
+    if (true) { // TODO Si on avance
+        t = trig;
+        e = echo;
+    } else {
+        t = trigAr;
+        e = echoAr;
     }
+    digitalWrite(t, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(t, LOW);
+    lecture_echo = pulseIn(e, HIGH);
+    cm = lecture_echo / 58;
+    return cm < 12
 }
 
 //--------------------------------------------------------------------------------------------------------
@@ -144,16 +149,14 @@ void retourConsigne()
 /* Actualisation du PID (sur timer)  */
 void asservissement()
 {
-    // Vérification du capteur devant
-    verifierCapDev();
+    int etat_pid_temp = etat_pid;
 
-    // TODO A faire sur un autre Arduino parce que ça démonte la fréquence d'échantillonage
-    // ou pas
-
-    // TODO Vérification du capteur arrière
+    if (obstacle()) {
+        etat_pid_temp = STOP;
+    }
 
     //  Paramètrage du PID
-    switch(etat_pid){
+    switch(etat_pid_temp){
         case AVANCER_RECULER :
             Kp = 0.08;
             Ki = 0.001;
@@ -285,6 +288,11 @@ void setup() {
     pinMode(trig, OUTPUT);
     digitalWrite(trig, LOW);
     pinMode(echo, INPUT);
+
+    //set sensor arrière
+    pinMode(trigAr, OUTPUT);
+    digitalWrite(trigAr, LOW);
+    pinMode(echoAr, INPUT);
 
     //Set PWM frequency to 31kHz for D11 & D12 !!!FOR Arduino Mega only
     TCCR1B = TCCR1B & B11111000 | B00000001;
