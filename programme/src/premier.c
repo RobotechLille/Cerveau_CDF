@@ -59,10 +59,56 @@ void stop()
 }
 
 // COORDONNES
+//
 
 float xpos = 0;
 float ypos = 0;
 float angl = 0;
+
+float deltaAngle(float xa, float ya, float xb, float yb, bool recul)
+{
+
+    float angle;
+    float dx = xa - xb;
+    float dy = ya - yb;
+    if (dy < 0) {
+        if (dx == 0) {
+            angle = M_PI_2;
+        } else if (dx > 0) {
+            angle = (-1) * atan(fabs(dy / dx));
+        } else {
+            angle = -M_PI + atan(fabs(dy / dx));
+        }
+    } else if (dy > 0) {
+        if (dx == 0) {
+            angle = -M_PI_2;
+        } else if (dx > 0) {
+            angle = atan(fabs(dy / dx));
+        } else {
+            angle = M_PI - atan(fabs(dy / dx));
+        }
+    } else {
+        if (dx > 0) {
+            angle = M_PI;
+        } else {
+            angle = 0;
+        }
+    }
+
+    if (angle > 0) {
+
+        float ret = angl - angle;
+        if (fabs(ret) <= M_PI) {
+            return ((-1) * ret);
+        } else {
+            if (ret < 0) {
+                return (M_2_PI - fabs(ret));
+            } else
+                return (M_2_PI - ret) * (-1);
+        }
+    }
+    return angle;
+}
 
 // Met à jour les coordonnées en fonction de ce qui a été avancé
 void updatePos(float distReelle)
@@ -71,6 +117,14 @@ void updatePos(float distReelle)
     xpos += cos(angl) * distReelle;
     ypos += sin(angl) * distReelle;
     printf("Nouvelle position : (%f, %f)\n", xpos, ypos);
+}
+
+void updateAngl(float anglReel)
+{
+    printf("On a tourné de %f rad.\n", anglReel);
+    angl += anglReel;
+    angl = fmod(anglReel, M_2_PI);
+    printf("Nouvel angle : %f\n", angl);
 }
 
 bool moveForward(float dist)
@@ -111,16 +165,35 @@ bool moveForward(float dist)
     }
 }
 
+bool rotate(float angle)
+{
+    char signal;
+    pivoter(angle);
+    signal = readChar(ardMoteur);
+    if (signal != 1) {
+        perror("Moteur attendait signal 1\n");
+        exit(1);
+    }
+    updateAngl(readFloat(ardMoteur));
+    return true;
+}
+
 void moveTo(float x, float y, bool avant)
 {
     printf("Nouvelle destination : (%f, %f) (avant = %d)\n", x, y, avant);
-    bool destAtteinte = false;
     float dist;
-    while (!destAtteinte) {
-        // TODO Trouver l'angle et s'orienter
+    for (;;)
+    {
+        dist = deltaAngle(xpos, ypos, x, y, avant);
+        if (!rotate(dist)) {
+            continue;
+        }
 
         dist = sqrt(pow(x - xpos, 2) + pow(y - ypos, 2));
-        destAtteinte = moveForward(dist);
+        if (!moveForward(dist)) {
+            continue;
+        }
+        break;
     }
 }
 
@@ -161,6 +234,18 @@ void parcours()
 int main()
 {
     openAll();
+
+    if (true) {
+        // JAUNE
+        xpos = 75;
+        ypos = 2055;
+        angl = M_PI;
+    } else {
+        // BLEU
+        xpos = 75;
+        ypos = 945;
+        angl = -M_PI;
+    }
 
     tirette();
     printf("Allons-y!\n");
