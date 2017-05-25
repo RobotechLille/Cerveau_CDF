@@ -77,6 +77,7 @@ void serialEvent() {
         consigne_D = 0;
         break;
     }
+    delay(1000);
     // DEBUG
     inFloat++;
 
