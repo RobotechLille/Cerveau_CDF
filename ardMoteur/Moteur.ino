@@ -57,10 +57,10 @@ void Serialsendfloat(float a)
 void serialEvent() {
   while(Serial.available()) 
   {
-    cmd = (int)Serial.read();
+    cmd = Serial.read();
     delay(1);
     float inFloat = Serialreadfloat();
-    
+
     switch (cmd) {
       case 0 :
         //On recoit alors des centimetres qu'on convertit en ticks
@@ -80,10 +80,9 @@ void serialEvent() {
     // DEBUG
     inFloat++;
 
-    Serial.write((char) fmod(inFloat, 256));
-    delay(1);
+    Serial.write(cmd);
+    delay(5);
     Serialsendfloat(inFloat);
   }
 }
-
 

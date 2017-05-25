@@ -42,12 +42,15 @@ float angl = 0;
 // Met à jour les coordonnées en fonction de ce qui a été avancé
 void updatePos(float distReelle)
 {
+    printf("On a avancé de %f cm.\n", distReelle);
     xpos += cos(angl) * distReelle;
     ypos += sin(angl) * distReelle;
+    printf("Nouvelle position : (%f, %f)\n", xpos, ypos);
 }
 
 bool moveForward(float dist)
 {
+    printf("Avançons de %f cm\n", dist);
     char signal;
     avancer(dist);
 
@@ -55,7 +58,7 @@ bool moveForward(float dist)
     for (;;)
     {
         // Si l'Arduino renvoie qu'il a terminé
-        if (read(ardMoteur, &signal, sizeof(signal) > 0)) {
+        if (read(ardMoteur, &signal, sizeof(signal)) > 0) {
             if (signal != 0) {
                 perror("Moteur attendait signal 0\n");
                 exit(1);
@@ -67,6 +70,7 @@ bool moveForward(float dist)
         // Si il y a un obstacle devant
         } else if (obstacleDevant()) {
             stop();
+            printf("Stoppé pour obstacle");
             signal = readChar(ardMoteur);
             if (signal != 2) {
                 perror("Moteur attendait signal 2\n");
@@ -87,6 +91,7 @@ bool moveForward(float dist)
 
 void moveTo(float x, float y, bool avant)
 {
+    printf("Nouvelle destination : (%f, %f) (avant = %d)\n", x, y, avant);
     bool destAtteinte = false;
     float dist;
     while (!destAtteinte)

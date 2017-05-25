@@ -34,7 +34,11 @@ void serialConfig(int fd, int speed)
 int openArduino(const char* path)
 {
     printf("Connexion à %s...\n", path);
-    int ard = openRetry(path, O_RDWR | O_NOCTTY | O_NDELAY);
+    int ard = open(path, O_RDWR | O_NOCTTY | O_NDELAY);
+    if (ard < 0) {
+        printf("Échec !\n");
+        exit(1);
+    }
     serialConfig(ard, B9600);
     sleep(1);
     printf("OK !\n");
