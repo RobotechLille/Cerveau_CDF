@@ -31,6 +31,16 @@ void serialConfig(int fd, int speed)
     }
 }
 
+int openArduino(const char* path)
+{
+    printf("Connexion à %s...\n", path);
+    int ard = openRetry(path, O_RDWR | O_NOCTTY | O_NDELAY);
+    serialConfig(ard, B9600);
+    sleep(1);
+    printf("OK !\n");
+    return ard;
+}
+
 // TODO DTR ← 0; sleep period; DTR ← 1
 // void resetArduino(const char* path)
 // {
@@ -56,31 +66,34 @@ void floatToStr(float f, char r[8])
     }
 }
 
-void sendChar(char c)
+void sendChar(int ard, char c)
 {
     write(ard, &c, 1);
 }
 
-void sendFloat(float f)
+void sendFloat(int ard, float f)
 {
     char consigne[8];
     floatToStr(f, consigne);
     write(ard, &consigne, 8);
 }
 
-char readChar()
+char readChar(int ard)
 {
     char c;
-    read(ard, &c, 1);
+    while (read(ard, &c, 1) <= 0)
+    {
+        continue;
+    }
     return c;
 }
 
-float readFloat()
+float readFloat(int ard)
 {
     char retour[9];
     int i;
     for (i = 0; i < 8; i++) {
-        read(ard, &retour[i], sizeof(char));
+        retour[i] = readChar(ard);
     }
     retour[8] = '\0';
     return atof(retour);

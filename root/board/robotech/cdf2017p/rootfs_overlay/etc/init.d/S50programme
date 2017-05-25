@@ -5,7 +5,7 @@
 
 start() {
 	printf "Starting main program: "
-    /opt/cdf/run.sh | while read line
+    /opt/cdf/bin/premier | while read line
     do
         echo "$(cat /proc/uptime | cut -d ' ' -f 1) $line" >> /var/log/programme
 	echo "OK"

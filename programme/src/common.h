@@ -14,13 +14,12 @@ int openRetry(const char *path, int flags);
 void serialConfig(int fd, int speed);
 
 // COM ARDUINO
-int ard; // Berk une variable globale contextuelle x)
-
+int openArduino(const char *path);
 void floatToStr(float f, char r[8]);
-void sendChar(char c);
-void sendFloat(float f);
-char readChar();
-float readFloat();
+void sendChar(int ard, char c);
+void sendFloat(int ard, float f);
+char readChar(int ard);
+float readFloat(int ard);
 
 #endif
 

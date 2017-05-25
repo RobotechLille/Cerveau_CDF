@@ -1,6 +1,6 @@
 # Règle par défaut
 #all: bin/chef
-all: bin/testpin bin/moteur
+all: bin/testpin bin/premier
 
 # Constantes
 CC=clang
@@ -12,10 +12,10 @@ CFLAGS=-g -Wall -Wextra -pedantic
 bin/chef: obj/chef.o obj/common.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-bin/pince: obj/pince.o obj/common.o
-	$(CC) -o $@ $^ $(LDFLAGS)
+bin/premier: obj/premier.o obj/common.o
+	$(CC) -o $@ $^ -lm $(LDFLAGS)
 
-bin/moteur: obj/moteur.o obj/common.o
+bin/pince: obj/pince.o obj/common.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 bin/testpin: obj/testpin.o
