@@ -16,6 +16,7 @@ define CDF2017P_INSTALL_TARGET_CMDS
 	$(INSTALL) -d -m 0755 $(TARGET_DIR)/opt/cdf/bin
 	$(INSTALL) -d -m 0755 $(TARGET_DIR)/opt/cdf/com
 	$(INSTALL) -D -m 0755 $(@D)/bin/* $(TARGET_DIR)/opt/cdf/bin
+	$(INSTALL) -D -m 0755 $(@D)/run.sh $(TARGET_DIR)/opt/cdf
 endef
 
 $(eval $(generic-package))

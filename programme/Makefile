@@ -1,6 +1,6 @@
 # Règle par défaut
 #all: bin/chef
-all: bin/pince bin/testpin bin/moteur
+all: bin/testpin bin/moteur
 
 # Constantes
 CC=clang

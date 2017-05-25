@@ -39,7 +39,7 @@ int main() {
         } else {
             signal = SIGNAL_PLS;
         }
-        printf("Signal %d", signal); // DEBUG
+        printf("Canard %d", signal); // DEBUG
         // write(pinceCap, &signal, sizeof(signal));
 
     }

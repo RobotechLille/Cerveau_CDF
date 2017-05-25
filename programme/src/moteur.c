@@ -42,6 +42,8 @@ int main()
     avancer(30);
     printf("Final = %f\n", lireFinal());
 
+    sleep(20);
+
     printf("Fin\n");
     close(ard);
 }
