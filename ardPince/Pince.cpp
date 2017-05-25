@@ -1,41 +1,42 @@
 #include <Arduino.h>
-#include <avr/io.h>
 
 // Programme qui gère la pince du robot
 // (ou pas)
 
-void setup() {
-  // pinMode(LED_BUILTIN, OUTPUT);
-    DDRA = 0xFF;
-    DDRC = 0xFF;
-    DDRG = 0xFF;
-    PORTC = 0x00;
-    Serial.begin(9600);
-}
+#define LED 22
 
 void ouvrirPince() {
-    PORTG = 0xFF;
+    digitalWrite(LED, HIGH);
+    delay(1000);
     return;
 }
 
 void fermerPince() {
-    PORTG = 0x00;
+    digitalWrite(LED, LOW);
+    delay(1000);
     return;
 }
 
 
 void serialEvent() {
     char command = Serial.read();
-    PORTA = command;
     switch (command) {
-        case 0x00:
+        case 'a':
             ouvrirPince();
             break;
-        case 0x01:
+        case 'b':
             fermerPince();
             break;
+        default:
+            return;
     }
-    // Serial.write(0);
+    Serial.write(0x02);
+}
+
+void setup() {
+    pinMode(LED, OUTPUT);
+    Serial.begin(9600);
+    ouvrirPince();
 }
 
 void loop() {
