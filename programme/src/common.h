@@ -12,6 +12,7 @@
 // Com tout et n'importe quoi
 int openRetry(const char *path, int flags);
 void serialConfig(int fd, int speed);
+int readBlock(int fildes, void *buf, size_t nbyte);
 
 // COM ARDUINO
 int ard; // Berk une variable globale contextuelle x)

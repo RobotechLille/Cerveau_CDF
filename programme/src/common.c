@@ -31,13 +31,23 @@ void serialConfig(int fd, int speed)
     }
 }
 
+int readBlock(int fildes, void *buf, size_t nbyte)
+{
+    int a;
+    while ((a = read(fildes, buf, nbyte)) <= 0) {
+        continue;
+    }
+    return a;
+}
+
+
 // TODO DTR ← 0; sleep period; DTR ← 1
 // void resetArduino(const char* path)
 // {
 //     int fd;
 //     fd = open(path, O_RDWR | O_NOCTTY); //Open Serial Port
 //     serialConfig(fd, 115200);
-// 
+//
 //     int RTS_flag;
 //     RTS_flag = TIOCM_RTS;
 //     ioctl(fd, TIOCMBIS, &RTS_flag); //Set RTS pin
@@ -71,7 +81,9 @@ void sendFloat(float f)
 char readChar()
 {
     char c;
-    read(ard, &c, 1);
+    while (read(ard, &c, 1) <= 0) {
+        continue;
+    }
     return c;
 }
 
@@ -80,9 +92,8 @@ float readFloat()
     char retour[9];
     int i;
     for (i = 0; i < 8; i++) {
-        read(ard, &retour[i], sizeof(char));
+        retour[i] = readChar();
     }
     retour[8] = '\0';
     return atof(retour);
 }
-
