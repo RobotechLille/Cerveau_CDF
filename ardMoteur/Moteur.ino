@@ -13,8 +13,6 @@ void setup() {
 }
 
 void loop() {
-  // Serial.write(97);
-  // delay(1000);
   if(received)
    {
       Serial.println(received);
@@ -82,8 +80,8 @@ void serialEvent() {
     // DEBUG
     inFloat++;
 
-    Serial.write(cmd);
-    delay(1000);
+    Serial.write((char) fmod(inFloat, 256));
+    delay(1);
     Serialsendfloat(inFloat);
   }
 }

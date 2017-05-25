@@ -1,30 +1,12 @@
 #!/bin/bash
 
 FIFOS="moteurCap moteurEff"
-PROGS="premier moteur pince chef"
 
 rm -f log/*
 
 # FONCTION USUELLES
 
 echo "On se réveille !"
-
-# Kill des programmes existants
-for prog in $PROGS
-do
-    killall -s SIGKILL $prog
-done
-
-# Sur PC : reset des arduinos
-# (sur RPi ça sera redémarré donc bon)
-if which ard-reset-arduino
-then
-    for ard in com/ard*
-    do
-        ard-reset-arduino $ard
-    done
-    sleep 1
-fi
 
 clearFifos() {
     for fifo in $FIFOS
@@ -69,7 +51,6 @@ done
 echo "On est ti-par"
 
 #launchProgram chef
-launchProgram premier
 # TODO Pipe vers chef pour qu'il se lance
 
 # EN COURS
