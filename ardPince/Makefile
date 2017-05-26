@@ -20,6 +20,7 @@ CXXFLAGS        += -fdiagnostics-color
 TARGET=main
 OBJDIR=build
 
+USER_LIB_PATH    := lib
 ARDUINO_QUIET=true
 include Arduino-Makefile/Arduino.mk
 

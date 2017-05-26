@@ -1,5 +1,6 @@
 #include <DynamixelSerial1.h>
 #include <Wire.h>
+
 #define PINCE_GAUCHE  1      //14
 #define PINCE_DROITE  2      //4
 
@@ -20,18 +21,20 @@ void ouvrirPince(){
 }
 
 void serialEvent() {
-    char command = Serial.read();
-    switch (command) {
-        case 'a':
-            ouvrirPince();
-            break;
-        case 'b':
-            fermerPince();
-            break;
-        default:
-            return;
+    while (Serial.available()) {
+        char command = Serial.read();
+        switch (command) {
+            case 'a':
+                ouvrirPince();
+                break;
+            case 'b':
+                fermerPince();
+                break;
+            default:
+                return;
+        }
+        Serial.write(0x02);
     }
-    Serial.write(0x02);
 }
 
 
