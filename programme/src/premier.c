@@ -40,12 +40,12 @@ int ardPince;
 
 void take()
 {
-    sendChar(ardMoteur, 'b');
+    sendChar(ardPince, 'b');
 }
 
 void drop()
 {
-    sendChar(ardMoteur, 'a');
+    sendChar(ardPince, 'a');
 }
 
 void push()
@@ -199,7 +199,7 @@ void moveTo(float x, float y, bool avant)
 void openAll()
 {
     // ardMoteur = openArduino("com/ardMoteur");
-    ardMoteur = openArduino("com/ardPince");
+    ardPince = openArduino("com/ardPince");
     printf("Tous les Arduinos sont ouverts.\n");
 }
 
