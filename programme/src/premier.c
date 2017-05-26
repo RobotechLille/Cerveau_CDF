@@ -35,6 +35,8 @@ void obstDet(bool state)
 }
 
 // PINCE
+//
+int ardPince;
 
 void take()
 {
@@ -196,13 +198,15 @@ void moveTo(float x, float y, bool avant)
 
 void openAll()
 {
-    ardMoteur = openArduino("com/ardMoteur");
+    // ardMoteur = openArduino("com/ardMoteur");
+    ardMoteur = openArduino("com/ardPince");
     printf("Tous les Arduinos sont ouverts.\n");
 }
 
 void closeAll()
 {
-    close(ardMoteur);
+    // close(ardMoteur);
+    close(ardPince);
     printf("Tous les Arduinos sont fermés.\n");
 }
 
@@ -250,7 +254,9 @@ int main()
         // parcours();
         // funnyAction();
         // moveTo(1160, 660, true);
-        moveForward(-100);
+        // moveForward(-100);
+        take();
+        //drop();
         // rotate(-M_PI_2);
         printf("Arrivé à la fin du parcours avant la fin du temps !\n");
     } else if (timer < 0) {
@@ -260,7 +266,7 @@ int main()
         sleep(10); // TODO DEBUG
         printf("Temps terminé !\n");
         kill(timer, SIGKILL);
-        stop();
+        // stop();
         printf("Démarrage de la funny action...\n");
         // funnyAction();
         printf("Fin\n");
