@@ -206,7 +206,7 @@ void closeAll()
     printf("Tous les Arduinos sont fermés.\n");
 }
 
-void parcours()
+void parcoursBleu()
 {
     printf("Démarrage du parcours\n");
     moveTo(75, 955, true);
@@ -224,6 +224,26 @@ void parcours()
     moveTo(1311, 811, true);
     drop();
     moveTo(1160, 660, true);
+}
+
+void parcoursJaune()
+{
+    printf("Démarrage du parcours\n");
+    moveTo(75, 2045, true);
+    moveTo(175, 2045, true);
+    moveTo(250, 2000, true);
+    moveTo(425, 2000, true);
+    take();
+    moveTo(885, 2000, true);
+    moveTo(885, 2300, true);
+    drop();
+    moveTo(885, 2000, false);
+    moveTo(1225, 2000, true);
+    take();
+    moveTo(1160, 2000, false);
+    moveTo(1311, 2089, true);
+    drop();
+    moveTo(1160, 2000, true);
 }
 
 int main()
