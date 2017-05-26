@@ -4,6 +4,36 @@
 #include <stdbool.h>
 #include <signal.h>
 
+// MOTEUR
+
+int ardMoteur;
+
+// Ordres
+void avancer(float dist)
+{
+    sendChar(ardMoteur, 0);
+    sendFloat(ardMoteur, dist/10);
+}
+
+void pivoter(float dist)
+{
+    sendChar(ardMoteur, 1);
+    sendFloat(ardMoteur, dist);
+}
+
+void stop()
+{
+    sendChar(ardMoteur, 2);
+}
+
+// OBSTACLE
+
+// Activate or deactivate obstacle detection
+void obstDet(bool state)
+{
+    sendChar(ardMoteur, state ? 7 : 8);
+}
+
 // PINCE
 
 void take()
@@ -16,46 +46,34 @@ void drop()
 
 }
 
+void push()
+{
+
+}
+
 // FUNNY ACTION
 
 void funnyAction()
 {
-
+    char signal = 5;
+    write(ardMoteur, &signal, sizeof(signal));
+    signal = readChar(ardMoteur);
+    if (signal != 5) {
+        perror("Moteur attendait signal 5\n");
+        exit(1);
+    }
 }
 
 // TIRETTE
+
 void tirette() {
-    // TODO Attend que la tirette soit enlevée
-}
-
-// OBSTACLE
-
-bool obstacleDevant()
-{
-    // TODO
-    return false;
-}
-
-// MOTEUR
-
-int ardMoteur;
-
-// Ordres
-void avancer(float dist)
-{
-    sendChar(ardMoteur, 0);
-    sendFloat(ardMoteur, dist);
-}
-
-void pivoter(float dist)
-{
-    sendChar(ardMoteur, 1);
-    sendFloat(ardMoteur, dist);
-}
-
-void stop()
-{
-    sendChar(ardMoteur, 2);
+    char signal = 6;
+    write(ardMoteur, &signal, sizeof(signal));
+    signal = readChar(ardMoteur);
+    if (signal != 6) {
+        perror("Moteur attendait signal 6\n");
+        exit(1);
+    }
 }
 
 // COORDONNES
@@ -129,40 +147,16 @@ void updateAngl(float anglReel)
 
 bool moveForward(float dist)
 {
-    printf("Avançons de %f cm\n", dist);
+    printf("Avançons de %f mm\n", dist);
     char signal;
     avancer(dist);
-
-    // Boucle d'attente de signal
-    for (;;) {
-        // Si l'Arduino renvoie qu'il a terminé
-        if (read(ardMoteur, &signal, sizeof(signal)) > 0) {
-            if (signal != 0) {
-                perror("Moteur attendait signal 0\n");
-                exit(1);
-            }
-            updatePos(readFloat(ardMoteur));
-            printf("Destination atteinte.\n");
-            return true;
-
-            // Si il y a un obstacle devant
-        } else if (obstacleDevant()) {
-            stop();
-            printf("Stoppé pour obstacle");
-            signal = readChar(ardMoteur);
-            if (signal != 2) {
-                perror("Moteur attendait signal 2\n");
-                exit(1);
-            }
-            updatePos(readFloat(ardMoteur));
-            return false;
-
-            // Sinon on fout rien
-        } else {
-            sleep(0);
-            continue;
-        }
+    signal = readChar(ardMoteur);
+    if (signal != 0) {
+        perror("Moteur attendait signal 0\n");
+        exit(1);
     }
+    updatePos(readFloat(ardMoteur));
+    return true;
 }
 
 bool rotate(float angle)
@@ -195,6 +189,7 @@ void moveTo(float x, float y, bool avant)
         }
         break;
     }
+    printf("Destination atteinte.\n");
 }
 
 // PRINCIPAL
@@ -235,15 +230,15 @@ int main()
 {
     openAll();
 
-    if (true) {
-        // JAUNE
-        xpos = 75;
-        ypos = 2055;
-        angl = M_PI;
-    } else {
+    if (false) {
         // BLEU
         xpos = 75;
         ypos = 945;
+        angl = M_PI;
+    } else {
+        // JAUNE
+        xpos = 75;
+        ypos = 2055;
         angl = -M_PI;
     }
 
@@ -252,7 +247,11 @@ int main()
 
     pid_t timer = fork();
     if (timer == 0) { // Processus enfant
-        parcours();
+        // parcours();
+        // funnyAction();
+        // moveTo(1160, 660, true);
+        moveForward(-100);
+        // rotate(-M_PI_2);
         printf("Arrivé à la fin du parcours avant la fin du temps !\n");
     } else if (timer < 0) {
         perror("Mauvais fork\n");
@@ -263,7 +262,7 @@ int main()
         kill(timer, SIGKILL);
         stop();
         printf("Démarrage de la funny action...\n");
-        funnyAction();
+        // funnyAction();
         printf("Fin\n");
         closeAll();
     }
