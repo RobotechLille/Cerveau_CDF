@@ -41,7 +41,7 @@ int long tick_G = 0;// Compteur de tick de la codeuse gauche
 int long tick_D = 0;// Compteur de tick de la codeuse droite
 int long tick_G_prec = 0;
 int long tick_D_prec = 0;
-int long consigne_G = 6000 ;
+int long consigne_G = 0 ;
 int long consigne_D = 0;
 int pwm_g =0, pwm_d = 0;
 // Create a TimedPID object instance
@@ -68,9 +68,18 @@ int echoAr = 52;
 long lecture_echo;
 long cm;
 
+float rayon = 4.0;
+float entreroues = 24;
+float perimetre = M_2_PI * rayon;
+float nbTicks = 1024;
+float reducteur = 4;
+
+
 
 // Vérifie le capteur
 bool obstacle() {
+    int t;
+    int e;
     if (true) { // TODO Si on avance
         t = trig;
         e = echo;
@@ -83,18 +92,20 @@ bool obstacle() {
     digitalWrite(t, LOW);
     lecture_echo = pulseIn(e, HIGH);
     cm = lecture_echo / 58;
-    return cm < 12
+    return cm < 12;
 }
 
 //--------------------------------------------------------------------------------------------------------
 /* Fonctions pour la communication série */
-void floatToStr(float f, char r[8]) {
+void floatToStr(float f, char r[9]) {
     char s[255];
-    sprintf(s, "%8f", (double) f);
+    // sprintf(s, "%8f", (double) f); // Ne marche pas sur Arduino
+    dtostrf(f, 8, 8, s);
     int i;
     for (i = 0; i < 8; i++) {
         r[i] = s[i];
     }
+    r[8] = '\0';
 }
 
 float Serialreadfloat()
@@ -128,11 +139,11 @@ void retourConsigne()
     float retour; // Distance parcourue ou angle tourné
     if (etat_pid == AVANCER_RECULER)
     {
-        retour = 42; // TODO Calcul par Cédric parce que j'ai la flemme de le faire
+        retour = perimetre * reducteur * (tick_G - tick_G_prec + tick_D - tick_D_prec) / 2 / nbTicks;
     }
     else if (etat_pid == TOURNER)
     {
-        retour = 1337;
+        retour = (perimetre * reducteur * (tick_G - tick_G_prec - tick_D + tick_D_prec) / 2 / nbTicks) / entreroues * 2;
     }
     else
     {
@@ -151,18 +162,18 @@ void asservissement()
 {
     int etat_pid_temp = etat_pid;
 
-    if (obstacle()) {
-        etat_pid_temp = STOP;
-    }
+    // if (obstacle()) {
+    //     etat_pid_temp = STOP;
+    // }
 
     //  Paramètrage du PID
     switch(etat_pid_temp){
         case AVANCER_RECULER :
-            Kp = 0.08;
-            Ki = 0.001;
-            Kd = 0.01;
-            pwm_g = pid_G.getCmdAutoStep(consigne_G, tick_G);
-            if(pwm_g <0)
+            // Kp = 0.08;
+            // Ki = 0.001;
+            // Kd = 0.01;
+            pwm_g = abs(pid_G.getCmdAutoStep(abs(consigne_G), tick_G));
+            if(consigne_G <0)
             {
                 digitalWrite(pin_rot_G,HIGH);
                 delay(1);
@@ -175,15 +186,27 @@ void asservissement()
                 digitalWrite(pin_rot_D,HIGH);
                 delay(1);
             }
-            pwm_g = abs(pwm_g);
             break;
 
         case TOURNER :
-            Kp = 0.2;
-            Ki = 0.00025;
-            Kd = 0.0025;
-            pwm_g = pid_G.getCmdAutoStep(consigne_G, tick_G);
-            pwm_d = pid_D.getCmdAutoStep(consigne_D, tick_D);
+            // Kp = 0.2;
+            // Ki = 0.00025;
+            // Kd = 0.0025;
+            pwm_g = pid_G.getCmdAutoStep(abs(consigne_G), tick_G);
+            if(consigne_G <0)
+            {
+                digitalWrite(pin_rot_G,HIGH);
+                delay(1);
+                digitalWrite(pin_rot_D,HIGH);
+                delay(1);
+            }
+            else {
+                digitalWrite(pin_rot_G,LOW);
+                delay(1);
+                digitalWrite(pin_rot_D,LOW);
+                delay(1);
+            }
+            pwm_g = abs(pwm_g);
             break;
 
         case STOP :
@@ -199,7 +222,8 @@ void asservissement()
     delay(1);
 
     // Si on est arrivé à la consigne
-    if (consigne_G - 10 <= tick_G) {
+    if (abs(tick_G - consigne_G) <= 10) {
+    // if (consigne_G - 10 <= tick_G) {
         retourConsigne();
     }
 }
@@ -241,21 +265,25 @@ void serialEvent() {
         delay(1);
         switch (cmd) {
             case AVANCER_RECULER :
+                tick_G_prec = tick_G;
+                tick_D_prec = tick_D;
                 etat_pid = AVANCER_RECULER;
                 //On recoit alors des centimetres qu'on convertit en ticks
-                consigne_G = Serialreadfloat() * conversion;
+                consigne_G = nbTicks * Serialreadfloat() / perimetre / reducteur;
                 consigne_D = consigne_G;
                 break;
 
             case TOURNER :
+                tick_G_prec = tick_G;
+                tick_D_prec = tick_D;
                 etat_pid = TOURNER;
                 //On recoit alors des degres qu'on convertit en ticks
-                // TODO Conversion fausse
-                consigne_G = Serialreadfloat() * conversion;
+                consigne_G = nbTicks * (entreroues * Serialreadfloat() / 2) / perimetre / reducteur;
                 consigne_D = -consigne_G;
                 break;
 
             case STOP :
+                retourConsigne();
                 etat_pid = STOP;
                 consigne_G = 0;
                 consigne_D = 0;
@@ -281,6 +309,7 @@ void serialEvent() {
 
 void setup() {
     myservo.attach(9);
+    // Remise à zéro de la funny action
     myservo.write(25);
     delay(15);
 
@@ -305,7 +334,7 @@ void setup() {
 
     // Définition des pins et des routines d'interruption
     attachInterrupt(0, compteur_gauche, RISING);    // Appel de compteur_gauche sur front montant valeur signal A de la codeuse gauche (interruption 0 = pin2 arduino mega)
-    // attachInterrupt(1, compteur_droit, RISING);     // Appel de compteur_droit sur front montant valeur signal A de la codeuse droite (interruption 1 = pin3 arduino mega)
+    attachInterrupt(1, compteur_droit, RISING);     // Appel de compteur_droit sur front montant valeur signal A de la codeuse droite (interruption 1 = pin3 arduino mega)
     pinMode(pinB_G, INPUT);   // Pin de signal B du la codeuse gauche
     pinMode(pinB_D, INPUT);   // Pin de signal B de la codeuse droite
 

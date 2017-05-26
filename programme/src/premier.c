@@ -12,7 +12,7 @@ int ardMoteur;
 void avancer(float dist)
 {
     sendChar(ardMoteur, 0);
-    sendFloat(ardMoteur, dist);
+    sendFloat(ardMoteur, dist/10);
 }
 
 void pivoter(float dist)
@@ -139,7 +139,7 @@ void updateAngl(float anglReel)
 
 bool moveForward(float dist)
 {
-    printf("Avançons de %f cm\n", dist);
+    printf("Avançons de %f mm\n", dist);
     char signal;
     avancer(dist);
     signal = readChar(ardMoteur);
@@ -222,15 +222,15 @@ int main()
 {
     openAll();
 
-    if (true) {
-        // JAUNE
-        xpos = 75;
-        ypos = 2055;
-        angl = M_PI;
-    } else {
+    if (false) {
         // BLEU
         xpos = 75;
         ypos = 945;
+        angl = M_PI;
+    } else {
+        // JAUNE
+        xpos = 75;
+        ypos = 2055;
         angl = -M_PI;
     }
 
@@ -239,7 +239,11 @@ int main()
 
     pid_t timer = fork();
     if (timer == 0) { // Processus enfant
-        parcours();
+        // parcours();
+        // funnyAction();
+        // moveTo(1160, 660, true);
+        moveForward(-100);
+        // rotate(-M_PI_2);
         printf("Arrivé à la fin du parcours avant la fin du temps !\n");
     } else if (timer < 0) {
         perror("Mauvais fork\n");
@@ -250,7 +254,7 @@ int main()
         kill(timer, SIGKILL);
         stop();
         printf("Démarrage de la funny action...\n");
-        funnyAction();
+        // funnyAction();
         printf("Fin\n");
         closeAll();
     }
