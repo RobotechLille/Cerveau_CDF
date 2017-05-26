@@ -26,6 +26,14 @@ void stop()
     sendChar(ardMoteur, 2);
 }
 
+// OBSTACLE
+
+// Activate or deactivate obstacle detection
+void obstDet(bool state)
+{
+    sendChar(ardMoteur, state ? 7 : 8);
+}
+
 // PINCE
 
 void take()

@@ -13,6 +13,8 @@ Servo myservo;  // create servo object to control a servo
 #define STOP 2
 #define FUNNY_ACT 5
 #define TIRETTE 6
+#define OBST_ON 7
+#define OBST_OFF 8
 
 //variable globale de choix de commande
 int etat_pid = STOP;
@@ -155,6 +157,8 @@ void retourConsigne()
     Serialsendfloat(retour);
 }
 
+bool obstDet = true;
+
 
 //--------------------------------------------------------------------------------------------------------
 /* Actualisation du PID (sur timer)  */
@@ -162,9 +166,9 @@ void asservissement()
 {
     int etat_pid_temp = etat_pid;
 
-    // if (obstacle()) {
-    //     etat_pid_temp = STOP;
-    // }
+    if (obstDet && obstacle()) {
+        etat_pid_temp = STOP;
+    }
 
     //  Paramètrage du PID
     switch(etat_pid_temp){
@@ -301,6 +305,14 @@ void serialEvent() {
                 etat_pid = STOP; // On est censé ne pas avoir démarré mais sais-t-on jamais
                 while(!digitalRead(pinTirette)){}
                 Serial.write(TIRETTE);
+                break;
+
+            case OBST_ON:
+                obstDet = true;
+                break;
+
+            case OBST_OFF:
+                obstDet = false;
                 break;
 
         }
