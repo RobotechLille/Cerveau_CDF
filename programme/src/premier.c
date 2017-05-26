@@ -40,12 +40,12 @@ int ardPince;
 
 void take()
 {
-
+    sendChar(ardMoteur, 'b');
 }
 
 void drop()
 {
-
+    sendChar(ardMoteur, 'a');
 }
 
 void push()
